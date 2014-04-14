@@ -11,24 +11,27 @@ module Fix
       def post_init
         @port, @ip  = Socket.unpack_sockaddr_in(get_peername)
         @client     = Client.get(ip)
-        @message    = nil
+        @msg_buf    = ""
+        @msg        = Message.new
+
+        log("Client connected from <#{ip}:#{port}>")
       end
 
       def receive_data(data)
-        log("Receive data <#{data}>")
-        @message_buffer << data.chomp
-        parse_messages_from_buffer
+        @msg_buf << data.chomp
+        parse_msgs_from_buf
       end
 
       def parse_messages_from_buffer
-        while idx = @message_buffer.index(SEPARATOR)
-          field = @message_buffer.slice!(0, idx + 1).gsub(/#{SEPARATOR}\Z/, '')
+        while idx = @msg_buf.index(SEPARATOR)
+          field = @msg_buf.slice!(0, idx + 1).gsub(/#{SEPARATOR}\Z/, '')
 
-          @message.append(field)
+          @msg.append(field)
 
-          if @message.complete?
-            @message.handle
-            @message = Message.new
+          if @msg.complete?
+            log("Received message <#{data}>")
+            @msg.handle
+            @msg = Message.new
           end
         end
       end

@@ -13,7 +13,7 @@ describe 'FE::Logger' do
 
   describe '.log' do
     it 'should call puts' do
-      @o.should_receive(:puts).with('foo').once
+      FE::Logger.should_receive(:puts).with('foo').once
       @o.log('foo')
     end
   end

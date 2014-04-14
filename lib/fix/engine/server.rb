@@ -17,8 +17,6 @@ module Fix
       def initialize(ip, port)
         @ip   = ip
         @port = port
-
-        run!
       end
 
       #
@@ -26,10 +24,16 @@ module Fix
       #
       def run!
         trap('INT') { EM.stop }
+        log("Starting FIX engine v#{FE::VERSION}, listening on <#{ip}:#{port}>, exit with <Ctrl-C>")
+        EM.run { start_server }
+      end
 
-        EM.run do
-          EM.start_server(ip, port, Connection)
-        end
+      #
+      # Starts a listener inside a running reactor
+      #
+      def start_server
+        raise "EventMachine must be running to start a server" unless EM.reactor_running?
+        EM.start_server(ip, port, Connection)
       end
 
     end

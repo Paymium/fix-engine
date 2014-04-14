@@ -8,5 +8,13 @@ describe 'Fix::Engine' do
     end
   end
 
+  describe '.run!' do
+    it 'should create a FE::Server instance and start it' do
+      FE::Server.should_receive(:new).with('foo', 'bar').once.and_call_original
+      FE::Server.any_instance.should_receive(:run!).once
+      FE.run!('foo', 'bar')
+    end
+  end
+
 end
 
