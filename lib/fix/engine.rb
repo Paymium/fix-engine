@@ -11,11 +11,14 @@ module Fix
   #
   module Engine
 
+    DEFAULT_IP    = '127.0.0.1'
+    DEFAULT_PORT  = 8359
+
     #
     # Runs a FIX server engine
     #
-    def self.run
-      Server.run
+    def self.run!(ip = DEFAULT_IP, port = DEFAULT_PORT)
+      Server.new(ip, port)
     end
 
     #

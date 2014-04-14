@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+require 'fix/engine'
+
+ip    = ENV['FE_IP']   || FE::DEFAULT_IP
+port  = ENV['FE_PORT'] || FE::DEFAULT_PORT
+
+Fix::Engine.run!(ip, port)
+

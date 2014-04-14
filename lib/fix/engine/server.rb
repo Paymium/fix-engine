@@ -14,21 +14,21 @@ module Fix
 
       attr_accessor :ip, :port
 
-      def initialize(ip = '127.0.0.1', port = 8359)
+      def initialize(ip, port)
         @ip   = ip
         @port = port
+
+        run!
       end
 
       #
       # Starts running the server engine
       #
-      def run
-        trap('INT') do
-          EM.stop
-        end
+      def run!
+        trap('INT') { EM.stop }
 
         EM.run do
-          EM.start_server(host, port, Connection)
+          EM.start_server(ip, port, Connection)
         end
       end
 
