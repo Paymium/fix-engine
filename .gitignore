@@ -1,0 +1,6 @@
+Gemfile.lock
+.yardoc
+coverage/
+*.swp
+doc/
+*.gem
