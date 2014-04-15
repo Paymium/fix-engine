@@ -1,11 +1,11 @@
 require_relative '../../spec_helper'
 
-require 'fix/engine/message'
+require 'fix/engine/message_buffer'
 
-describe 'FE::Message' do
+describe 'FE::MessageBuffer' do
 
   before do
-    @msg = FE::Message.new
+    @msg = FE::MessageBuffer.new
   end
 
   describe '#append' do

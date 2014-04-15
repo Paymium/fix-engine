@@ -1,5 +1,9 @@
 module Fix
   module Engine
+
+    #
+    # Naive logger implementation used in development
+    #
     module Logger
 
       #
