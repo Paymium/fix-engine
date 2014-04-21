@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'fix-protocol'
   s.add_dependency 'eventmachine'
+  s.add_dependency 'em-logger'
 
   s.files         = Dir.glob('{lib,bin}/**/*') + %w(LICENSE README.md)
   s.require_path  = 'lib'

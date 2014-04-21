@@ -1,5 +1,7 @@
 require 'eventmachine'
+
 require 'fix/engine/message_buffer'
+require 'fix/engine/client'
 
 module Fix
   module Engine
@@ -29,7 +31,9 @@ module Fix
       # @param data [String] The received data chunk
       #
       def receive_data(data)
-        msg_buf << data.chomp
+        data_chunk = data.chomp
+        log("Received data chunk <#{data_chunk}>")
+        msg_buf << data_chunk
         parse_messages_from_buffer
       end
 
@@ -43,7 +47,6 @@ module Fix
           msg.append(field)
 
           if msg.complete?
-            log("Received message <#{msg}>")
             msg.handle
             msg = MessageBuffer.new
           end

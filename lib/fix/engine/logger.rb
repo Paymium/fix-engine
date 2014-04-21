@@ -1,3 +1,6 @@
+require 'logger'
+require 'em-logger'
+
 module Fix
   module Engine
 
@@ -20,7 +23,8 @@ module Fix
       # running specs
       #
       def self.log(msg)
-        puts(msg)
+        @logger ||= EM::Logger.new(::Logger.new(STDOUT))
+        @logger.debug(msg)
       end
 
     end

@@ -1,3 +1,5 @@
+require 'fix/protocol'
+
 module Fix
   module Engine
 
@@ -6,6 +8,8 @@ module Fix
     # proper terminator it is handled
     #
     class MessageBuffer
+
+      include Logger
 
       attr_accessor :fields
 
@@ -39,7 +43,11 @@ module Fix
       # Nothing done for now
       #
       def handle
-        # NOOP
+        fix_msg = Protocol.parse(fields.map { |f| "#{f[0]}=#{f[1]}\x01" }.join)
+        log fix_msg.class
+        if fix_msg.class == FP::ParseFailure
+          fix_msg.errors.each { |e| log e }
+        end
       end
 
     end
