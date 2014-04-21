@@ -11,10 +11,11 @@ module Fix
 
       include Logger
 
-      attr_accessor :fields
+      attr_accessor :fields, :client
 
-      def initialize
+      def initialize(client)
         @fields = []
+        @client = client
       end
 
       #
@@ -43,12 +44,33 @@ module Fix
       # Nothing done for now
       #
       def handle
-        fix_msg = Protocol.parse(fields.map { |f| "#{f[0]}=#{f[1]}\x01" }.join)
-        log fix_msg.class
-        if fix_msg.class == FP::ParseFailure
-          fix_msg.errors.each { |e| log e }
+        msg = FP::Message.parse(to_s)
+
+        klass = msg.class
+
+        if (klass == FP::ParseFailure) || !msg.errors.count.zero?
+          log("Failed to parse message <#{debug}>")
+          log_errors(msg)
+
+        elsif (klass == FP::Messages::Logon)
+          log("Authenticating client <#{client.key}>")
+          client.authenticate!(msg.username, msg.heart_bt_int, msg.msg_seq_num)
         end
       end
+
+      def debug
+        to_s('|')
+      end
+
+      def to_s(sep = "\x01")
+        fields.map { |f| f.join('=') }.join(sep) + sep
+      end
+
+      def log_errors(msg)
+        log("Invalid message received <#{debug}>")
+        msg.errors.each { |e| log(" >>> #{e}") }
+      end
+
 
     end
   end

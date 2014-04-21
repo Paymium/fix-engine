@@ -1,4 +1,3 @@
-require 'logger'
 require 'em-logger'
 
 module Fix
@@ -8,6 +7,8 @@ module Fix
     # Naive logger implementation used in development
     #
     module Logger
+
+      @@logger = nil
 
       #
       # Logs a message to the standard output

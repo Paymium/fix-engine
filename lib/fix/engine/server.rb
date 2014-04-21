@@ -1,4 +1,5 @@
 require 'eventmachine'
+
 require 'fix/protocol'
 require 'fix/engine/connection'
 
@@ -11,6 +12,8 @@ module Fix
     class Server
 
       include Logger
+
+      REPORT_INTERVAL = 5
 
       attr_accessor :ip, :port
 
@@ -34,6 +37,11 @@ module Fix
       def start_server
         raise "EventMachine must be running to start a server" unless EM.reactor_running?
         EM.start_server(ip, port, Connection)
+        REPORT_INTERVAL && EM.add_periodic_timer(REPORT_INTERVAL) { report_status }
+      end
+
+      def report_status
+        log("#{Client.count} client(s) currently connected")
       end
 
     end
