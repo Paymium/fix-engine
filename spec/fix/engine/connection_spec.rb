@@ -12,10 +12,11 @@ describe 'FE::Connection' do
   end
 
   describe '#post_init' do
-    it 'should register a client' do
+    it 'should register a client and add a logon timeout' do
       @conn.stub(:get_peername).and_return('foo')
       Socket.should_receive(:unpack_sockaddr_in).once.with('foo').and_return(['some_port', 'some_ip'])
-      FE::Client.should_receive(:get).with('some_ip')
+      FE::Client.should_receive(:get).with('some_ip', 'some_port', @conn).and_return(double(Object).as_null_object)
+      EM.should_receive(:add_timer).once.with(FE::Connection::LOGON_TIMEOUT)
       @conn.post_init
     end
   end

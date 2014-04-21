@@ -9,7 +9,7 @@ RSpec.configure do |config|
   config.mock_with :rspec
 
   config.before(:each) do
-    FE::Logger.stub(:puts)
+    FE::Logger.stub(:log)
   end
 end
 

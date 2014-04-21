@@ -27,6 +27,8 @@ module Fix
         @port, @ip  = Socket.unpack_sockaddr_in(get_peername)
         @client     = Client.get(ip, port, self)
         log("Client connected from <#{@client.key}>, expecting logon message in the next #{LOGON_TIMEOUT}s")
+
+        # TODO : How do we test this
         EM.add_timer(LOGON_TIMEOUT) { logon_timeout }
       end
 
@@ -56,9 +58,7 @@ module Fix
       # complete the temporary message, it is handled
       #
       def parse_messages_from_buffer
-        puts msg_buf
-        msg_buf.gsub!('|', "\x01")
-        puts msg_buf
+        #msg_buf.gsub!('|', "\x01")
 
         while idx = msg_buf.index("\x01")
           field = msg_buf.slice!(0, idx + 1).gsub(/\x01\Z/, '')

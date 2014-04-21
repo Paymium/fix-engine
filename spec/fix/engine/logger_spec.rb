@@ -12,8 +12,9 @@ describe 'FE::Logger' do
   end
 
   describe '.log' do
-    it 'should call puts' do
-      FE::Logger.should_receive(:puts).with('foo').once
+    it 'should call debug on a Logger instance' do
+      FE::Logger.unstub(:log)
+      Logger.any_instance.should_receive(:debug).once.with('foo')
       @o.log('foo')
     end
   end

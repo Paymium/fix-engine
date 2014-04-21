@@ -19,6 +19,7 @@ describe 'FE::Server' do
     end
 
     it 'should start a listener if a reactor is running' do
+      EM.stub(:add_periodic_timer)
       EM.should_receive(:reactor_running?).once.and_return(true)
       EM.should_receive(:start_server).once.with('1.2.3.4', 1234, FE::Connection)
       @server.start_server
