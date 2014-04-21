@@ -1,3 +1,7 @@
+#require 'fix/engine/logger'
+
+require 'fix/protocol'
+
 module Fix
   module Engine
 
@@ -7,10 +11,13 @@ module Fix
     #
     class MessageBuffer
 
-      attr_accessor :fields
+      include Logger
 
-      def initialize
+      attr_accessor :fields, :client
+
+      def initialize(client)
         @fields = []
+        @client = client
       end
 
       #
@@ -39,8 +46,36 @@ module Fix
       # Nothing done for now
       #
       def handle
-        # NOOP
+        msg = FP::Message.parse(to_s)
+
+        klass = msg.class
+
+        require 'pry'
+        #binding.pry
+
+        if (klass == FP::ParseFailure) || !msg.errors.count.zero?
+          log("Failed to parse message <#{debug}>")
+          log_errors(msg)
+
+        elsif (klass == FP::Messages::Logon)
+          log("Authenticating client <#{client.key}>")
+          client.authenticate!(msg.username, msg.heart_bt_int, msg.msg_seq_num)
+        end
       end
+
+      def debug
+        to_s('|')
+      end
+
+      def to_s(sep = "\x01")
+        fields.map { |f| f.join('=') }.join(sep) + sep
+      end
+
+      def log_errors(msg)
+        log("Invalid message received <#{debug}>")
+        msg.errors.each { |e| log(" >>> #{e}") }
+      end
+
 
     end
   end

@@ -1,3 +1,5 @@
+require 'logger'
+
 module Fix
   module Engine
 
@@ -5,6 +7,8 @@ module Fix
     # Naive logger implementation used in development
     #
     module Logger
+
+      @@logger = nil
 
       #
       # Logs a message to the standard output
@@ -20,7 +24,8 @@ module Fix
       # running specs
       #
       def self.log(msg)
-        puts(msg)
+        @@logger ||= ::Logger.new(STDOUT)
+        @@logger.debug(msg)
       end
 
     end
