@@ -12,7 +12,7 @@ module Fix
   module Engine
 
     # The default IP on which the server will listen    
-    DEFAULT_IP    = '127.0.0.1'
+    DEFAULT_IP    = '0.0.0.0'
 
     # The default port on which the server will listen
     DEFAULT_PORT  = 8359
