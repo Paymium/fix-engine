@@ -1,6 +1,7 @@
 require 'eventmachine'
 
 require 'fix/protocol'
+require 'fix/engine/version'
 require 'fix/engine/connection'
 
 module Fix
