@@ -50,12 +50,6 @@ module Fix
         "#{ip}:#{port}"
       end
 
-      def authenticate!(username, hrtbt_int, seq_num)
-        log("Client authenticated as <#{username}> with heartbeat interval of <#{hrtbt_int}s> and message sequence number start <#{seq_num}>")
-        @client_id  = username
-        connection.set_heartbeat_interval(hrtbt_int)
-      end
-
     end
   end
 end

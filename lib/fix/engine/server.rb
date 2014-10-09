@@ -14,7 +14,7 @@ module Fix
 
       include Logger
 
-      REPORT_INTERVAL = 5
+      REPORT_INTERVAL = 10
 
       attr_accessor :ip, :port
 

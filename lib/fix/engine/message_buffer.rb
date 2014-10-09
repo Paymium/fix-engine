@@ -41,21 +41,27 @@ module Fix
       end
 
       #
-      # Nothing done for now
+      # Parses the message into a FP::Message instance
       #
-      def handle
+      def parse
         msg = FP::Message.parse(to_s)
-
-        klass = msg.class
-
-        if (klass == FP::ParseFailure) || !msg.errors.count.zero?
+        if (msg.class == FP::ParseFailure) || !msg.errors.count.zero?
           log("Failed to parse message <#{debug}>")
           log_errors(msg)
-
-        elsif (klass == FP::Messages::Logon)
-          log("Authenticating client <#{client.key}>")
-          client.authenticate!(msg.username, msg.heart_bt_int, msg.msg_seq_num)
+          nil
+        else
+          msg
         end
+      end
+
+      #
+      # Parses the message and empties the fields array so a new message
+      # can start to get buffered right away
+      #
+      def parse!
+        parsed = parse
+        @fields = []
+        parsed
       end
 
       def debug
