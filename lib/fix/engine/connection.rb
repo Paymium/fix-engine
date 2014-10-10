@@ -142,6 +142,8 @@ module Fix
         # Handle resend request
         # Handle test request
 
+        log("Received a <#{msg.class}> from <#{ip}:#{port}> with sequence number <#{msg.msg_seq_num}>")
+
         # If sequence number == expected, then process it normally
         if (@expected_clt_seq_num == @recv_seq_num)
 
@@ -153,8 +155,6 @@ module Fix
             end
 
           else
-            log("Received a <#{msg.class}> from <#{ip}:#{port}> with sequence number <#{msg.msg_seq_num}>")
-
             if !@client_comp_id && msg.is_a?(FP::Messages::Logon)
               log("Client authenticated as <#{msg.username}> with heartbeat interval of <#{msg.heart_bt_int}s> and message sequence number start <#{msg.msg_seq_num}>")
               client.client_id  = msg.username
@@ -179,6 +179,12 @@ module Fix
               if @pending_test_req_id && msg.test_req_id && (@pending_test_req_id == msg.test_req_id)
                 @pending_test_req_id = nil
               end
+
+            elsif msg.is_a?(FP::Messages::TestRequest)
+              # Answer test requests with a matching heartbeat
+              hb = FP::Messages::Heartbeat.new
+              hb.test_req_id = msg.test_req_id
+              send_msg(hb)
             end
           end
 
