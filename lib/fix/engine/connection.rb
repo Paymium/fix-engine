@@ -47,6 +47,9 @@ module Fix
 
         # TODO : Read configuration here
         @comp_id = 'PYMBTCDEV'
+        
+        # The sent messages
+        @messages = []
 
         # TODO : How do we test this
         # TODO : Do we cancel the periodic timeout when leaving ?
@@ -94,6 +97,7 @@ module Fix
         log("Sending <#{msg.class}> to <#{ip}:#{port}> with sequence number <#{msg.msg_seq_num}>")
 
         if msg.valid?
+          @messages[msg.msg_seq_num] = msg
           send_data(msg.dump)
           @send_seq_num += 1
           @last_send_at = Time.now.to_i
@@ -168,7 +172,11 @@ module Fix
               send_msg(logon)
 
             elsif @client_comp_id && msg.is_a?(FP::Messages::Logon)
-              client_error("Expecting only a single logon message during a session", msg.msg_seq_num)
+              log("Received second logon message, reset_seq_num_flag <#{msg.reset_seq_num_flag}>")
+              if msg.reset_seq_num_flag = 'Y'
+                @send_seq_num = 1
+                @messages = []
+              end
 
             elsif !@client_comp_id
               client_error("The session must be started with a logon message", msg.msg_seq_num, target_comp_id: msg.sender_comp_id)
@@ -185,6 +193,18 @@ module Fix
               hb = FP::Messages::Heartbeat.new
               hb.test_req_id = msg.test_req_id
               send_msg(hb)
+
+            elsif msg.is_a?(FP::Messages::ResendRequest)
+              # Re-send requested message range
+              @messages[msg.begin_seq_no, msg.end_seq_no.zero? ? @messages.length : msg.end_seq_no].each do |m|
+                log("Re-sending <#{m.class}> to <#{ip}:#{port}> with sequence number <#{m.msg_seq_num}>")
+                send_data(m.dump)
+                @last_send_at = Time.now.to_i
+              end
+
+
+            elsif msg.is_a?(FP::Message)
+              on_message(msg)
             end
           end
 
