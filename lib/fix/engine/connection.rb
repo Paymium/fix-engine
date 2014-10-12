@@ -223,6 +223,9 @@ module Fix
         self.last_request_at = Time.now.to_i
       end
 
+      def on_message(msg)
+      end
+
       #
       # Run when a client has sent a chunk of data, it gets appended to a buffer
       # and a parsing attempt is made at the buffered data
