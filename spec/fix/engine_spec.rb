@@ -11,7 +11,7 @@ describe 'Fix::Engine' do
   describe '.run!' do
     it 'should create a FE::Server instance and start it' do
       expect(FE::Server).to receive(:new).with('foo', 'bar').once.and_call_original
-      expect(FE::Server.any_instance).to receive(:run!).once
+      expect_any_instance_of(FE::Server).to receive(:run!).once
       FE.run!('foo', 'bar')
     end
   end

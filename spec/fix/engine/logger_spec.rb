@@ -13,8 +13,8 @@ describe 'FE::Logger' do
 
   describe '.log' do
     it 'should call debug on a Logger instance' do
-      FE::Logger.unstub(:log)
-      Logger.any_instance.should_receive(:debug).once.with('foo')
+      allow(FE::Logger).to receive(:log).and_call_original
+      expect_any_instance_of(Logger).to receive(:debug).once.with('foo')
       @o.log('foo')
     end
   end
