@@ -20,8 +20,8 @@ module Fix
     #
     # Runs a FIX server engine
     #
-    def self.run!(ip = DEFAULT_IP, port = DEFAULT_PORT)
-      Server.new(ip, port).run!
+    def self.run!(ip = DEFAULT_IP, port = DEFAULT_PORT, handler = FE::Connection)
+      Server.new(ip, port, handler).run!
     end
 
     #

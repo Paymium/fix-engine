@@ -3,7 +3,7 @@ require_relative '../../spec_helper'
 describe 'FE::Server' do
 
   before do
-    @server = FE::Server.new('1.2.3.4', 1234)
+    @server = FE::Server.new('1.2.3.4', 1234, FE::Connection)
   end
 
   describe '#run!' do
