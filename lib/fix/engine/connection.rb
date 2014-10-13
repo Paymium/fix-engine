@@ -9,7 +9,7 @@ module Fix
     #
     # The client connection handling logic and method overrides
     #
-    module Connection
+    class Connection
 
       include Logger
 
@@ -201,7 +201,6 @@ module Fix
                 send_data(m.dump)
                 @last_send_at = Time.now.to_i
               end
-
 
             elsif msg.is_a?(FP::Message)
               on_message(msg)

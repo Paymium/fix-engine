@@ -3,12 +3,7 @@ require_relative '../../spec_helper'
 describe 'FE::Connection' do
 
   before do
-    @conn = Object.new
-    @conn.instance_eval do
-      class << self
-        include FE::Connection
-      end
-    end
+    @conn = FE::Connection.new
   end
 
   describe '#post_init' do
