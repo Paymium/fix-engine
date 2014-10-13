@@ -9,7 +9,7 @@ module Fix
     #
     # The client connection handling logic and method overrides
     #
-    class Connection
+    class Connection < EM::Connection
 
       include Logger
 
