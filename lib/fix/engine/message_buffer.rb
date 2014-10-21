@@ -44,7 +44,7 @@ module Fix
       # Parses the message into a FP::Message instance
       #
       def parse
-        msg = FP::Message.parse(to_s)
+        msg = FP.parse(to_s)
         if (msg.class == FP::ParseFailure) || !msg.errors.count.zero?
           log("Failed to parse message <#{debug}>")
           log_errors(msg)

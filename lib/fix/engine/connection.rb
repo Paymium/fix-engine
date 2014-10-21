@@ -116,10 +116,12 @@ module Fix
       end
 
       def kill!
-        log("Logging out client <#{ip}:#{port}>")
-        logout = FP::Messages::Logout.new
-        logout.text = 'Bye!'
-        send_msg(logout)
+        if @client_comp_id
+          log("Logging out client <#{ip}:#{port}>")
+          logout = FP::Messages::Logout.new
+          logout.text = 'Bye!'
+          send_msg(logout)
+        end
 
         close_connection_after_writing
       end
@@ -234,7 +236,14 @@ module Fix
       def receive_data(data)
         data_chunk = data.chomp
         msg_buf << data_chunk
-        parse_messages_from_buffer
+
+        begin
+          parse_messages_from_buffer
+        rescue
+          log("Client <#{@client.key}> raised exception when parsing data <#{data.gsub(/\x01/, '|')}>, terminating.")
+          log($!.message + $!.backtrace.join("\n"))
+          kill!
+        end
       end
 
       #
@@ -242,8 +251,12 @@ module Fix
       # complete the temporary message, it is handled
       #
       def parse_messages_from_buffer
+ #       binding.pry
         while idx = msg_buf.index("\x01")
           field = msg_buf.slice!(0, idx + 1).gsub(/\x01\Z/, '')
+
+#binding.pry
+
           msg.append(field)
           if msg.complete?
             parsed = msg.parse!
