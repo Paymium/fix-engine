@@ -145,9 +145,6 @@ module Fix
       def handle_msg(msg)
         @recv_seq_num = msg.msg_seq_num
        
-        # Handle resend request
-        # Handle test request
-
         log("Received a <#{msg.class}> from <#{ip}:#{port}> with sequence number <#{msg.msg_seq_num}>")
 
         # If sequence number == expected, then process it normally
@@ -251,16 +248,17 @@ module Fix
       # complete the temporary message, it is handled
       #
       def parse_messages_from_buffer
- #       binding.pry
         while idx = msg_buf.index("\x01")
           field = msg_buf.slice!(0, idx + 1).gsub(/\x01\Z/, '')
-
-#binding.pry
 
           msg.append(field)
           if msg.complete?
             parsed = msg.parse!
-            parsed && handle_msg(parsed)
+            if parsed.is_a?(FP::Message)
+              handle_msg(parsed)
+            elsif parsed.is_a?(FP::ParseFailure)
+              client_error(msg.errors.join(", "))
+            end
           end
         end
       end
