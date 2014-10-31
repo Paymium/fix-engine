@@ -48,10 +48,9 @@ module Fix
         if (msg.class == FP::ParseFailure) || !msg.errors.count.zero?
           log("Failed to parse message <#{debug}>")
           log_errors(msg)
-          nil
-        else
-          msg
         end
+
+        msg
       end
 
       #

@@ -91,8 +91,8 @@ module Fix
         @send_seq_num ||= 1
 
         msg.msg_seq_num     = @send_seq_num
-        msg.target_comp_id  = @client_comp_id
         msg.sender_comp_id  = @comp_id || DEFAULT_COMP_ID
+        msg.target_comp_id  ||= @client_comp_id
 
         log("Sending <#{msg.class}> to <#{ip}:#{port}> with sequence number <#{msg.msg_seq_num}>")
 
@@ -250,14 +250,14 @@ module Fix
       def parse_messages_from_buffer
         while idx = msg_buf.index("\x01")
           field = msg_buf.slice!(0, idx + 1).gsub(/\x01\Z/, '')
-
           msg.append(field)
+
           if msg.complete?
             parsed = msg.parse!
             if parsed.is_a?(FP::Message)
               handle_msg(parsed)
             elsif parsed.is_a?(FP::ParseFailure)
-              client_error(msg.errors.join(", "))
+              client_error(parsed.errors.join(", "), @expected_clt_seq_num, target_comp_id: (@client_comp_id || 'UNKNOWN'))
             end
           end
         end
