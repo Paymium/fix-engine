@@ -45,8 +45,7 @@ module Fix
 
         log("Client connected from <#{@client.key}>, expecting logon message in the next #{LOGON_TIMEOUT}s")
 
-        # TODO : Read configuration here
-        @comp_id = 'PYMBTCDEV'
+        @comp_id ||= DEFAULT_COMP_ID
         
         # The sent messages
         @messages = []
@@ -91,7 +90,7 @@ module Fix
         @send_seq_num ||= 1
 
         msg.msg_seq_num     = @send_seq_num
-        msg.sender_comp_id  = @comp_id || DEFAULT_COMP_ID
+        msg.sender_comp_id  = @comp_id
         msg.target_comp_id  ||= @client_comp_id
 
         log("Sending <#{msg.class}> to <#{ip}:#{port}> with sequence number <#{msg.msg_seq_num}>")
@@ -154,7 +153,7 @@ module Fix
             @client_comp_id = msg.sender_comp_id
 
             if (msg.target_comp_id != @comp_id)
-              client_error("Incorrect TARGET_COMP_ID in message, expected <#{@comp_id}>, got <#{msg.target_comp_id}>", msg.header.msq_seq_num)
+              client_error("Incorrect TARGET_COMP_ID in message, expected <#{@comp_id}>, got <#{msg.target_comp_id}>", msg.header.msg_seq_num)
             end
 
           else
@@ -165,9 +164,10 @@ module Fix
               set_heartbeat_interval(msg.heart_bt_int)
 
               logon = FP::Messages::Logon.new
-              logon.username        = msg.username
-              logon.target_comp_id  = msg.sender_comp_id
-              logon.sender_comp_id  = msg.target_comp_id 
+              logon.username            = msg.username
+              logon.target_comp_id      = msg.sender_comp_id
+              logon.sender_comp_id      = msg.target_comp_id 
+              logon.reset_seq_num_flag  = true
               send_msg(logon)
 
             elsif @client_comp_id && msg.is_a?(FP::Messages::Logon)
@@ -207,6 +207,9 @@ module Fix
           end
 
           @expected_clt_seq_num += 1
+
+        elsif msg.is_a?(FP::Messages::Logon)
+          client_error("Expected logon message to have msg_seq_num = <1>, received <#{msg.msg_seq_num}>", msg.msg_seq_num, target_comp_id: msg.sender_comp_id)
 
         elsif (@expected_clt_seq_num > @recv_seq_num)
           log("Ignoring message <#{msg}> with stale sequence number <#{msg.msg_seq_num}>, expecting <#{@expected_clt_seq_num}>")
