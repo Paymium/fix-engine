@@ -154,7 +154,7 @@ module Fix
             @client_comp_id = msg.sender_comp_id
 
             if (msg.target_comp_id != @comp_id)
-              client_error("Incorrect TARGET_COMP_ID in message, expected <#{@comp_id}>, got <#{msg.target_comp_id}>", msg.msq_seq_num)
+              client_error("Incorrect TARGET_COMP_ID in message, expected <#{@comp_id}>, got <#{msg.target_comp_id}>", msg.header.msq_seq_num)
             end
 
           else
