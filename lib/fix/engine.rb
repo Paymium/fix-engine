@@ -1,5 +1,6 @@
 require 'fix/engine/logger'
 require 'fix/engine/server'
+require 'fix/engine/client_connection'
 
 #
 # Main FIX namespace

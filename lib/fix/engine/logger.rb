@@ -24,8 +24,14 @@ module Fix
       # running specs
       #
       def self.log(msg)
+        logger.debug(msg)
+      end
+
+      #
+      # Returns the current logger
+      #
+      def self.logger
         @logger ||= ::Logger.new(STDOUT)
-        @logger.debug(msg)
       end
 
     end
