@@ -13,3 +13,8 @@ RSpec.configure do |config|
   end
 end
 
+class FakeSocketClient < EM::Connection
+def post_init
+  send_data('io')
+end
+end

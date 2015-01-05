@@ -1,18 +1,40 @@
 require_relative '../../spec_helper'
 
+
+#require 'socket'
+
 describe 'FE::Connection' do
 
   before do
-    @conn = FE::Connection.new
+    #@conn = FE::Connection.new
   end
 
   describe '#post_init' do
     it 'should register a client and add a logon timeout' do
-      allow(@conn).to receive(:get_peername).and_return('foo')
-      expect(Socket).to receive(:unpack_sockaddr_in).once.with('foo').and_return(['some_port', 'some_ip'])
-      expect(FE::Client).to receive(:get).with('some_ip', 'some_port', @conn).and_return(double(Object).as_null_object)
-      expect(EM).to receive(:add_timer).once.with(FE::Connection::LOGON_TIMEOUT)
-      @conn.post_init
+      has_run = false
+      EM.run do
+        FE::Server.new('0.0.0.0', 6666, FE::Connection).start_server
+          #          raise 'io'
+          #          expect(conn).to receive(:get_peername).and_return('foo')
+          #          expect(Socket).to receive(:unpack_sockaddr_in).once.and_return(['some_port', 'some_ip'])
+          #          expect(FE::Client).to receive(:get).with('some_ip', 'some_port', @conn).and_return(double(Object).as_null_object)
+          #
+          #          expect(EM).to receive(:add_periodic_timer).once
+          #          #expect(EM).to receive(:add_timer).twice#.once #twice.and_yield # (Once for the server starting, the other for the logon timeout)
+                    has_run = true
+
+
+        EM.connect('0.0.0.0', 6666, FakeSocketClient) #do |conn|
+
+          EM.next_tick do
+          EM.next_tick do
+            EM.stop
+          end
+          end
+      end
+
+      expect(has_run).to be_truthy
+
     end
   end
 

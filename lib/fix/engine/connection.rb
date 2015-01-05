@@ -39,7 +39,9 @@ module Fix
       # Run after a client has connected
       #
       def post_init
-        @port, @ip = Socket.unpack_sockaddr_in(get_peername)
+raise 'BEYOOOTCH'
+
+        @port, @ip            = Socket.unpack_sockaddr_in(get_peername)
         @client               = Client.get(ip, port, self)
         @expected_clt_seq_num = 1
 
