@@ -13,9 +13,18 @@ module Fix
 
       attr_accessor :fields, :client
 
-      def initialize(client)
+      def initialize(&block)
         @fields = []
-        @client = client
+
+        raise "A block accepting a FP::Message as single parameter must be provided" unless (block && (block.arity == 1))
+        @msg_handler = block
+      end
+
+      def add_data(data)
+        data_chunk = data.chomp
+        msg_buf << data_chunk
+
+        parse_messages
       end
 
       #
@@ -41,41 +50,36 @@ module Fix
       end
 
       #
-      # Parses the message into a FP::Message instance
+      # Attempts to parse fields from the message buffer, if the fields that get parsed
+      # complete the temporary message, it is processed
       #
-      def parse
-        msg = FP.parse(to_s)
-        if (msg.class == FP::ParseFailure) || !msg.errors.count.zero?
-          log("Failed to parse message <#{debug}>")
-          log_errors(msg)
-        end
+      def parse_messages(&block)
+        while idx = msg_buf.index("\x01")
+          field = msg_buf.slice!(0, idx + 1).gsub(/\x01\Z/, '')
+          append(field)
 
-        msg
+          if complete?
+            parsed = FP.parse(to_s)
+            @fields = []
+            @msg_handler.call(parsed)
+          end
+        end
       end
 
       #
-      # Parses the message and empties the fields array so a new message
-      # can start to get buffered right away
+      # The data buffer string
       #
-      def parse!
-        parsed = parse
-        @fields = []
-        parsed
+      def msg_buf
+        @msg_buf ||= ''
       end
 
       def debug
-        to_s('|')
+        "#{to_s('|')}#{@msg_buf}"
       end
 
       def to_s(sep = "\x01")
         fields.map { |f| f.join('=') }.join(sep) + sep
       end
-
-      def log_errors(msg)
-        log("Invalid message received <#{debug}>")
-        msg.errors.each { |e| log(" >>> #{e}") }
-      end
-
 
     end
   end

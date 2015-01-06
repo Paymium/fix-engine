@@ -17,7 +17,7 @@ module Fix
       #
       TEST_REQ_GRACE_TIME = 15
 
-      attr_accessor :ip, :port, :msg_buf, :hrtbt_int, :last_request_at, :comp_id, :peer_comp_id
+      attr_accessor :ip, :port, :msg_buf, :hrtbt_int, :last_request_at, :comp_id, :target_comp_id
 
       #
       # Initialize the messages array, our comp_id, and the expected message sequence number
@@ -43,7 +43,7 @@ module Fix
       #
       def set_heartbeat_interval(interval)
         @hrtbt_int && raise("Can't set heartbeat interval twice")
-        @heartbt_int = interval
+        @hrtbt_int = interval
 
         log("Heartbeat interval for #{peer} : <#{hrtbt_int}s>")
         @keep_alive_timer = EM.add_periodic_timer(1) { keep_alive }
@@ -115,7 +115,7 @@ module Fix
           @last_send_at = Time.now.to_i
         else
           log(msg.errors.join(', '))
-          raise "Tried to send invalid message!"
+          raise "Tried to send invalid message! <#{msg.errors.join(', ')}>"
         end
       end
 
@@ -140,7 +140,7 @@ module Fix
       #
       def unbind
         log("Terminating connection to #{peer}")
-        @keep_alive_monitor && @keep_alive_monitor.cancel
+        @keep_alive_timer && @keep_alive_timer.cancel
       end
 
       #
@@ -170,9 +170,8 @@ module Fix
 
         # If sequence number == expected, then process it normally
         if (@expected_seq_num == @recv_seq_num)
-
           if @comp_id && msg.target_comp_id != @comp_id
-            @client_comp_id = msg.sender_comp_id
+            @target_comp_id = msg.sender_comp_id
 
             # Whoops, incorrect COMP_ID received, kill it with fire
             if (msg.target_comp_id != @comp_id)
@@ -195,7 +194,7 @@ module Fix
 
             elsif msg.is_a?(FP::Messages::ResendRequest)
               # Re-send requested message range
-              @messages[msg.begin_seq_no, msg.end_seq_no.zero? ? @messages.length : msg.end_seq_no].each do |m|
+              @messages[msg.begin_seq_no - 1, (msg.end_seq_no.zero? ? @messages.length : (msg.end_seq_no - msg.begin_seq_no + 1))].each do |m|
                 log("Re-sending <#{m.class}> to <#{ip}:#{port}> with sequence number <#{m.msg_seq_num}>")
                 send_data(m.dump)
                 @last_send_at = Time.now.to_i
@@ -209,12 +208,12 @@ module Fix
           @expected_seq_num += 1
 
         elsif (@expected_seq_num > @recv_seq_num)
-          log("Ignoring message <#{msg}> with stale sequence number <#{msg.msg_seq_num}>, expecting <#{@expected_clt_seq_num}>")
+          #log("Ignoring message <#{msg}> with stale sequence number <#{msg.msg_seq_num}>, expecting <#{@expected_seq_num}>")
 
-        elsif (@expected_seq_num < @recv_seq_num) && @client_comp_id
+        elsif (@expected_seq_num < @recv_seq_num) && @target_comp_id
           # Request missing range when detect a gap
           rr = FP::Messages::ResendRequest.new
-          rr.begin_seq_no = @expected_clt_seq_num
+          rr.begin_seq_no = @expected_seq_num
           send_msg(rr)
         end
 
@@ -238,50 +237,25 @@ module Fix
       # @param data [String] The received data chunk
       #
       def receive_data(data)
-        data_chunk = data.chomp
-        msg_buf << data_chunk
+        @buf ||= MessageBuffer.new do |parsed|
+          if (parsed.class == FP::ParseFailure) || !parsed.errors.count.zero?
+            peer_error("#{parsed.message} -- #{parsed.errors.join(", ")}", @expected_seq_num)
+            log("Failed to parse message <#{parsed.message}>")
+            parsed.errors.each { |err| log(" >>> #{err}") }
+
+          else
+            process_msg(parsed)
+
+          end
+        end
 
         begin
-          parse_messages_from_buffer
+          @buf.add_data(data)
         rescue
-          log("Raised exception by #{peer} when parsing data <#{data.gsub(/\x01/, '|')}>, terminating.")
+          log("Raised exception by #{peer} when parsing data <#{@buf.msg_buf.gsub(/\x01/, '|')}>, terminating.")
           log($!.message + $!.backtrace.join("\n"))
           kill!
         end
-      end
-
-      #
-      # Attempts to parse fields from the message buffer, if the fields that get parsed
-      # complete the temporary message, it is processed
-      #
-      def parse_messages_from_buffer
-        while idx = msg_buf.index("\x01")
-          field = msg_buf.slice!(0, idx + 1).gsub(/\x01\Z/, '')
-          msg.append(field)
-
-          if msg.complete?
-            parsed = msg.parse!
-            if parsed.is_a?(FP::Message)
-              process_msg(parsed)
-            elsif parsed.is_a?(FP::ParseFailure)
-              peer_error(parsed.errors.join(", "), @expected_clt_seq_num, target_comp_id: (@client_comp_id || 'UNKNOWN'))
-            end
-          end
-        end
-      end
-
-      #
-      # The data buffer string
-      #
-      def msg_buf
-        @msg_buf ||= ''
-      end
-
-      #
-      # Temporary message to which fields get appended
-      #
-      def msg
-        @msg ||= MessageBuffer.new(@client)
       end
 
     end
