@@ -1,5 +1,8 @@
 require_relative '../../spec_helper'
 
+
+#require 'socket'
+
 describe 'FE::Connection' do
 
   before do
