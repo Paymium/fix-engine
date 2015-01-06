@@ -3,7 +3,10 @@ require_relative '../../spec_helper'
 describe 'FE::Connection' do
 
   before do
-    @conn = FE::Connection.new
+    @conn = Object.new
+    @conn.class.instance_eval do
+      include FE::Connection
+    end
   end
 
   describe '#post_init' do
@@ -34,9 +37,11 @@ describe 'FE::Connection' do
 
     it 'should handle a message if it is complete' do
       @conn.msg_buf << "69=DATA\x01"
+      parsed = Object.new
       expect(@conn.msg).to receive(:complete?).and_return(false, true)
-      expect(@conn.msg).to receive(:parse!).once.and_return(:foo)
-      expect(@conn).to receive(:handle_msg).once.with(:foo)
+      expect(@conn.msg).to receive(:parse!).once.and_return(parsed)
+      expect(@conn).to receive(:handle_msg).once.with(parsed)
+      expect(parsed).to receive(:is_a?).with(FP::Message).once.and_return(true)
       @conn.parse_messages_from_buffer
     end
   end

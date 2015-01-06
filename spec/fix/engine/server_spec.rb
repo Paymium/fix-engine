@@ -26,5 +26,13 @@ describe 'FE::Server' do
     end
   end
 
+  describe '#report_status' do
+    it 'should enumerate clients and issue a log' do
+      expect(FE::Client).to receive(:count).once
+      expect(@server).to receive(:log).once
+      @server.report_status
+    end
+  end
+
 end
 
