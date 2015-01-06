@@ -3,20 +3,11 @@ require_relative '../../spec_helper'
 describe 'FE::Connection' do
 
   before do
-    @conn = Object.new
-    @conn.class.instance_eval do
-      include FE::Connection
+    class SampleConnection
+      include FE::ClientConnection
     end
-  end
 
-  describe '#post_init' do
-    it 'should register a client and add a logon timeout' do
-      allow(@conn).to receive(:get_peername).and_return('foo')
-      expect(Socket).to receive(:unpack_sockaddr_in).once.with('foo').and_return(['some_port', 'some_ip'])
-      expect(FE::Client).to receive(:get).with('some_ip', 'some_port', @conn).and_return(double(Object).as_null_object)
-      expect(EM).to receive(:add_timer).once.with(FE::Connection::LOGON_TIMEOUT)
-      @conn.post_init
-    end
+    @conn = SampleConnection.new
   end
 
   describe '#receive_data' do
@@ -40,10 +31,12 @@ describe 'FE::Connection' do
       parsed = Object.new
       expect(@conn.msg).to receive(:complete?).and_return(false, true)
       expect(@conn.msg).to receive(:parse!).once.and_return(parsed)
-      expect(@conn).to receive(:handle_msg).once.with(parsed)
+      expect(@conn).to receive(:process_msg).once.with(parsed)
       expect(parsed).to receive(:is_a?).with(FP::Message).once.and_return(true)
       @conn.parse_messages_from_buffer
     end
   end
 
 end
+
+
