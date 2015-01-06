@@ -4,7 +4,7 @@ module Fix
   #
   # The fix-engine gem version string
   #   
-  VERSION = '0.0.24'
+  VERSION = '0.0.3'
 
   end
 end
