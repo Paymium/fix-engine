@@ -110,8 +110,8 @@ end
 
 # Usage as a FIX acceptor
 
-You start a simple FIX acceptor that will maintain a session by running the `fix-engine` executable.
-The basic FIX acceptor requires a `COMP_ID` environment to be present.
+You can start a simple FIX acceptor that will maintain a session by running the `fix-engine` executable.
+The basic FIX acceptor requires a `COMP_ID` environment variable to be set.
 
 ````
 $ COMP_ID=MY_COMP_ID fix-engine
@@ -125,12 +125,12 @@ $ COMP_ID=MY_COMP_ID fix-engine
 ````
 
 In order to handle business messages appropriately you need to implement a connection handler
-that includes the `FE::ServerConnection` and use that as a connection handler.
+that includes the `FE::ServerConnection` module and use that as a connection handler.
 
 ````ruby
 class MyHandler < EM::Connection
 
-  include EM::ServerConnection
+  include FE::ServerConnection
 
   def on_market_data_request
     # Fetch market data and send the relevant response
