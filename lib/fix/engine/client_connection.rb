@@ -16,14 +16,13 @@ module Fix
       # Run after we've connected to the server
       #
       def post_init
-        log("Connected to server sending a logon message with our COMP_ID <#{@comp_id}>")
+        super
+
+        log("Connecting to server sending a logon message with our COMP_ID <#{@comp_id}>")
 
         @logged_in = false
 
-        # The sent messages
-        @messages = []
-
-        send_logon
+        EM.next_tick { send_logon }
       end
 
       #

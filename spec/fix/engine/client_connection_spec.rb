@@ -12,6 +12,7 @@ describe 'FE::ClientConnection' do
 
   describe '#post_init' do
     it 'should logon' do
+      expect(EM).to receive(:next_tick).and_yield
       expect(@conn).to receive(:send_msg) do |*args|
         expect(args.first).to be_an_instance_of(FP::Messages::Logon)
       end

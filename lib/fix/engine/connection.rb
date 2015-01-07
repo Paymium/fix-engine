@@ -208,7 +208,7 @@ module Fix
           @expected_seq_num += 1
 
         elsif (@expected_seq_num > @recv_seq_num)
-          #log("Ignoring message <#{msg}> with stale sequence number <#{msg.msg_seq_num}>, expecting <#{@expected_seq_num}>")
+          log("Ignoring message <#{msg}> with stale sequence number <#{msg.msg_seq_num}>, expecting <#{@expected_seq_num}>")
 
         elsif (@expected_seq_num < @recv_seq_num) && @target_comp_id
           # Request missing range when detect a gap

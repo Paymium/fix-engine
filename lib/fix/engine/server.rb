@@ -14,6 +14,9 @@ module Fix
 
       include Logger
 
+      #
+      # Periodicity in seconds of logged status reports
+      #
       REPORT_INTERVAL = 10
 
       attr_accessor :ip, :port
@@ -42,6 +45,9 @@ module Fix
         REPORT_INTERVAL && EM.add_periodic_timer(REPORT_INTERVAL) { report_status }
       end
 
+      #
+      # Logs a short summary of the current server status
+      #
       def report_status
         log("#{Client.count} client(s) currently connected")
       end

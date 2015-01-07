@@ -20,10 +20,13 @@ module Fix
         @msg_handler = block
       end
 
+      #
+      # Adds received bytes to the message buffer and attempt to process them
+      #
+      # @param data [String] The received FIX message bits, as they come
+      #
       def add_data(data)
-        data_chunk = data.chomp
-        msg_buf << data_chunk
-
+        msg_buf << data.chomp
         parse_messages
       end
 
@@ -73,10 +76,21 @@ module Fix
         @msg_buf ||= ''
       end
 
+      #
+      # Returns a human-friendly string of the currently handled data
+      #
+      # @return [String] The parsed fields and the temporary buffer
+      #
       def debug
         "#{to_s('|')}#{@msg_buf}"
       end
 
+      #
+      # Returns the current fields as a string joined by a given separator
+      #
+      # @param sep [String] The separator
+      # @return [String] The fields joined by the separator
+      #
       def to_s(sep = "\x01")
         fields.map { |f| f.join('=') }.join(sep) + sep
       end
