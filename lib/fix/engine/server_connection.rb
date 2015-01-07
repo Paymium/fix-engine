@@ -34,9 +34,11 @@ module Fix
       # Logs the client out should he fail to authenticate before +LOGON_TIMEOUT+ seconds
       #
       def logon_timeout
+        unless @target_comp_id
         log("Client #{peer} failed to authenticate before timeout, closing connection")
         close_connection_after_writing
         client.delete
+        end
       end
 
       #
@@ -98,5 +100,4 @@ module Fix
     end
   end
 end
-
 

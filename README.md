@@ -3,9 +3,9 @@ FIX Engine [![Build Status](https://secure.travis-ci.org/Paymium/fix-engine.png?
 
 This library provides an event-machine based FIX server and client connection implementation.
 
-# Usage example (client connection)
+# Usage as a FIX client
 
-## Connection class
+## Implement a connection handler
 
 Create an `EM::Connection` subclass and include the `FE::ClientConnection` module. You will then have to implement
 the callbacks for the various message types you are interested in.
@@ -68,7 +68,7 @@ module Referee
 end
 ````
 
-## Connecting it to a FIX server
+## Use it to connect to a FIX acceptor
 
 Once your connection class has been created you can establish a connection in a running EventMachine reactor. 
 See the [referee gem](https://github.com/davout/referee) for the full code example.
@@ -107,6 +107,48 @@ module Referee
 end
 ````
 
-# Usage example (FIX acceptor)
 
-TODO
+# Usage as a FIX acceptor
+
+You start a simple FIX acceptor that will maintain a session by running the `fix-engine` executable.
+The basic FIX acceptor requires a `COMP_ID` environment to be present.
+
+````
+$ COMP_ID=MY_COMP_ID fix-engine
+
+> D, [2015-01-07T12:47:07.807867 #87486] DEBUG -- : Starting FIX engine v0.0.31, listening on <0.0.0.0:8359>, exit with <Ctrl-C>
+> D, [2015-01-07T12:47:12.379787 #87486] DEBUG -- : Client connected <127.0.0.1:54204>, expecting logon message in the next 10s
+> D, [2015-01-07T12:47:12.816626 #87486] DEBUG -- : Received a <Fix::Protocol::Messages::Logon> from <127.0.0.1:54204> with sequence number <1>
+> D, [2015-01-07T12:47:12.820093 #87486] DEBUG -- : Peer authenticated as <JAVA_TESTS> with heartbeat interval of <30s> and message sequence number start <1>
+> D, [2015-01-07T12:47:12.820259 #87486] DEBUG -- : Heartbeat interval for <127.0.0.1:54204> : <30s>
+> D, [2015-01-07T12:47:12.820899 #87486] DEBUG -- : Sending <Fix::Protocol::Messages::Logon> to <127.0.0.1:54204> with sequence number <1>
+````
+
+In order to handle business messages appropriately you need to implement a connection handler
+that includes the `FE::ServerConnection` and use that as a connection handler.
+
+````ruby
+class MyHandler < EM::Connection
+
+  include EM::ServerConnection
+
+  def on_market_data_request
+    # Fetch market data and send the relevant response
+    #  ...
+  end
+
+end
+
+server = FE::Server.new('127.0.0.1', 8095, MyHandler) do |conn|
+  conn.comp_id = 'MY_COMP_ID'
+end
+
+# This will also start an EventMachine reactor
+server.run!
+
+# This would be used inside an already-running reactor
+EM.run do
+  server.start_server
+end
+````
+

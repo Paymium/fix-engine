@@ -5,5 +5,11 @@ require 'fix/engine'
 ip    = ENV['FE_IP']   || FE::DEFAULT_IP
 port  = ENV['FE_PORT'] || FE::DEFAULT_PORT
 
-Fix::Engine.run!(ip, port)
+if ENV['COMP_ID']
+  Fix::Engine.run!(ip, port) do |conn|
+    conn.comp_id = ENV['COMP_ID']
+  end
+else
+  puts "The COMP_ID environment variable must be set to be able to start a basic acceptor."
+end
 

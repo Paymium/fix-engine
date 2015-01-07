@@ -21,10 +21,11 @@ module Fix
 
       attr_accessor :ip, :port
 
-      def initialize(ip, port, handler)
+      def initialize(ip, port, handler, &block)
         @ip       = ip
         @port     = port
         @handler  = handler
+        @block    = block
       end
 
       #
@@ -41,7 +42,9 @@ module Fix
       #
       def start_server
         raise "EventMachine must be running to start a server" unless EM.reactor_running?
-        EM.start_server(ip, port, @handler)
+
+        EM.start_server(ip, port, @handler) { |conn| @block && @block.call(conn) }
+
         REPORT_INTERVAL && EM.add_periodic_timer(REPORT_INTERVAL) { report_status }
       end
 
