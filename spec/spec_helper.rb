@@ -1,5 +1,10 @@
 require 'simplecov'
+require 'coveralls'
 
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+  SimpleCov::Formatter::HTMLFormatter,
+  Coveralls::SimpleCov::Formatter
+]
 SimpleCov.start
 
 require(File.expand_path('../../lib/fix/engine', __FILE__))
@@ -12,8 +17,3 @@ RSpec.configure do |config|
   end
 end
 
-class FakeSocketClient < EM::Connection
-def post_init
-  send_data('io')
-end
-end
