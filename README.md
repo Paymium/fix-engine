@@ -1,4 +1,4 @@
-FIX Engine [![Build Status](https://secure.travis-ci.org/Paymium/fix-engine.png?branch=master)](http://travis-ci.org/Paymium/fix-engine)
+FIX Engine [![Build Status](https://secure.travis-ci.org/Paymium/fix-engine.png?branch=master)](http://travis-ci.org/Paymium/fix-engine) [![Coverage Status](https://img.shields.io/coveralls/Paymium/fix-engine.svg)](https://coveralls.io/r/Paymium/fix-engine?branch=master)
 =
 
 This library provides an event-machine based FIX server and client connection implementation.
