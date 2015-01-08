@@ -33,7 +33,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'simplecov', '~> 0.9'
   s.add_development_dependency 'coveralls', '~> 0.7'
 
-  s.add_dependency 'fix-protocol', '~> 0.0.64'
+  s.add_dependency 'fix-protocol', '~> 1.0'
   s.add_dependency 'eventmachine', '~> 1.0'
 
   s.licenses      = ['MIT']
